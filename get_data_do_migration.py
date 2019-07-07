@@ -10,6 +10,9 @@ from requests.packages.urllib3.poolmanager import PoolManager
 today = date.today()
 today = today.strftime("%d_%m_%Y")
 
+with open('lastdate.txt', 'w') as f:
+    f.write(today)
+
 pw = os.environ['PW']
 print(pw)
 
@@ -62,7 +65,7 @@ if __name__ == '__main__':
 
     # [TODO] 2019/07/07 일 만나면 break 하는 로직. (마지막 데이터 갖고 온 것 기준 중지)
     
-    tag = tags[0]
+    tag = tags[7]
     LIMIT = 100
     for offset in range(0, 30000, LIMIT):
         remove_exist = False 
