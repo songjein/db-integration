@@ -1,0 +1,39 @@
+f = File.new('photos.json', 'w')
+
+Photo.all.each do |p|
+f.puts p.as_json.to_json
+end
+
+///////////////////////////////////////////////////////탭제거해서 쓰기
+
+f = File.new('posts.json', 'w')
+
+Post.all.each do |p|
+buf = p.as_json
+buf['tag_list'] = p.tag_list
+if p.post_type == 2
+buf['link'] = p.link
+end
+f.puts buf.to_json
+end
+
+///////////////////////////////////////////////////////
+
+f = File.new('users.json', 'w')
+
+User.all.each do |p|
+f.puts p.as_json.to_json
+end
+
+///////////////////////////////////////////////////////
+f = File.new('binders.json', 'w')
+
+Project.all.each do |p|
+f.puts p.as_json.to_json
+end
+
+///////////////////////////////////////////////////////
+
+6/6 - 7:14분
+Counter({'facebook': 2858, None: 1604, 'google_oauth2': 289})
+posts 15438개 중 183개 스킵됨 
