@@ -3,38 +3,33 @@ import requests
 
 # camel case for node js
 
-"""
-	20190602
-	297개의 바인더(with UserBinder association) 성공적으로 삽입
+def migrate_binder(filepath):
+  with open(filepath) as f:
+    for line in f:
+      binder = ujson.loads(line)
+      oldId = binder['id']
+      oldUserId = binder['user_id']
 
-"""
+      title = binder['name']
+      photo = binder['photo']['url']
+      if photo == 'project_default.jpg':
+        photo = '/binder_default.jpg'
+      desc = binder['desc']
+      createdAt = binder['created_at']
 
-with open('projects.json') as f:
-	binders = ujson.loads(f.read())
-	for binder in binders:
-		oldId = binder['id']
-		oldUserId = binder['user_id']
+      binder_data = {
+        'oldId': oldId,
+        'title': title,
+        'oldUserId': oldUserId,
+        'photo': photo,
+        'desc': desc,
+        'createdAt': createdAt,
+      }
 
-		title = binder['name']
-		photo = binder['photo']['url']
-		if photo == 'project_default.jpg':
-			photo = '/binder_default.jpg'
-		desc = binder['desc']
-		createdAt = binder['created_at']
+      API = 'http://ec2-54-180-96-29.ap-northeast-2.compute.amazonaws.com:3000/binder/integrate'
 
-		binder_data = {
-			'oldId': oldId,
-			'title': title,
-			'oldUserId': oldUserId,
-			'photo': photo,
-			'desc': desc,
-			'createdAt': createdAt,
-		}
-
-		API = 'http://ec2-54-180-96-29.ap-northeast-2.compute.amazonaws.com:3000/binder/integrate'
-
-		res = requests.post(API, data=binder_data)
-		print(res.json())
+      res = requests.post(API, data=binder_data)
+      print(res.json())
 
 """
 {

@@ -1,102 +1,99 @@
 import ujson
 import requests
 
-f_post = open('posts.json')
-f_photo = open('photos.json')
 
-posts = [] 
-photos = [] 
-post_dict = {}
-'''
-{"id":16814,"title":"실내 인테리어 상세뷰","content":"","created_at":"2018-11-16T22:59:25.000+09:00","updated_at":"2018-11-16T22:59:25.000+09:00","user_id":4343,"project_id":null,"post_type":1,"is_secret":false,"view_count":0,"challenge_id":null,"tag_list":[]}
-'''
-skip_cnt = 0
-for line in f_post:
-	post = ujson.loads(line)
-	post_id = post['id']
-	post_dict[post_id] = post
-	post_dict[post_id]['imgList'] = []
-	post_dict[post_id]['captionList'] = []
+def migrate_post_with_photo(post_filename, photo_filename):
+  f_post = open(post_filename)
+  f_photo = open(photo_filename)
 
-for line in f_photo:
-	photo = ujson.loads(line)
-	post_id = photo['post_id']
-	img_url = photo['image']['url']
-	caption = photo['caption']
-	if caption is None:
-		caption = ''
-	
-	if post_id not in post_dict:
-		#print('deleted post', post_id)
-		continue
+  posts = [] 
+  photos = [] 
+  post_dict = {}
+  '''
+  {"id":16814,"title":"실내 인테리어 상세뷰","content":"","created_at":"2018-11-16T22:59:25.000+09:00","updated_at":"2018-11-16T22:59:25.000+09:00","user_id":4343,"project_id":null,"post_type":1,"is_secret":false,"view_count":0,"challenge_id":null,"tag_list":[]}
+  '''
+  skip_cnt = 0
+  for line in f_post:
+    post = ujson.loads(line)
+    post_id = post['id']
+    post_dict[post_id] = post
+    post_dict[post_id]['imgList'] = []
+    post_dict[post_id]['captionList'] = []
 
-	post_dict[post_id]['imgList'].append(img_url)
-	post_dict[post_id]['captionList'].append(caption)	
+  for line in f_photo:
+    photo = ujson.loads(line)
+    post_id = photo['post_id']
+    img_url = photo['image']['url']
+    caption = photo['caption']
+    if caption is None:
+      caption = ''
+    
+    if post_id not in post_dict:
+      # print('deleted post', post_id)
+      continue
 
-for idx, key in enumerate(post_dict.keys()):
-	post = post_dict[key]
+    post_dict[post_id]['imgList'].append(img_url)
+    post_dict[post_id]['captionList'].append(caption)	
 
-	if post['post_type'] == 1 and len(post['content']) == 0 and len(post['imgList']) == 0:
-		skip_cnt += 1
-		continue
+  for idx, key in enumerate(post_dict.keys()):
+    post = post_dict[key]
 
-	oldId = post['id']
-	oldUserId = post['user_id']
-	oldBinderId = post['project_id']
+    if post['post_type'] == 1 and len(post['content']) == 0 and len(post['imgList']) == 0:
+      skip_cnt += 1
+      continue
 
-	title = post['title']
-	content = post['content']
-	imgList = post['imgList']
-	captionList = post['captionList']
-	
-	tagList = post['tag_list']
+    oldId = post['id']
+    oldUserId = post['user_id']
+    oldBinderId = post['project_id']
 
-	isSecret = post['is_secret']
-	viewCount = post['view_count']
+    title = post['title']
+    content = post['content']
+    imgList = post['imgList']
+    captionList = post['captionList']
+    
+    tagList = post['tag_list']
 
-	createdAt = post['created_at']
+    isSecret = post['is_secret']
+    viewCount = post['view_count']
 
-	SEP = '%#@#@%'
+    createdAt = post['created_at']
 
-	post_data = {
-		'oldId': oldId,
-		'oldUserId': oldUserId,
-		'oldBinderId': oldBinderId,
-		'title': title,
-		'content': content,
-		'imgList': (SEP).join(imgList),
-		'captionList': (SEP).join(captionList),
-		'isSecret': isSecret,
-		'viewCount': viewCount,
-		'createdAt': createdAt,
-		'tagList': (SEP).join(tagList),
-	}	
+    SEP = '%#@#@%'
 
-	if post['post_type'] == 2:
-		link = post['link']
-		if link == None:
-			skip_cnt += 1
-			continue
-		post_data['imgList'] = link['image_url']
-		post_data['captionList'] = '출처: <a href="' + link['link_url'] + '">' + link['link_title'] + '</a>'
+    post_data = {
+      'oldId': oldId,
+      'oldUserId': oldUserId,
+      'oldBinderId': oldBinderId,
+      'title': title,
+      'content': content,
+      'imgList': (SEP).join(imgList),
+      'captionList': (SEP).join(captionList),
+      'isSecret': isSecret,
+      'viewCount': viewCount,
+      'createdAt': createdAt,
+      'tagList': (SEP).join(tagList),
+    }	
 
-	API = 'http://ec2-54-180-96-29.ap-northeast-2.compute.amazonaws.com:3000/post/integrate'
+    if post['post_type'] == 2:
+      link = post['link']
+      if link == None:
+        skip_cnt += 1
+        continue
+      post_data['imgList'] = link['image_url']
+      post_data['captionList'] = '출처: <a href="' + link['link_url'] + '">' + link['link_title'] + '</a>'
 
-	if len(post['title']) == 0 and len(post['content']) == 0 and len(post['imgList']) == 0:
-		skip_cnt += 1
-		continue
-	#print(post_data)
+    API = 'http://ec2-54-180-96-29.ap-northeast-2.compute.amazonaws.com:3000/post/integrate'
 
-	skip_to = 8500
-	if oldId < skip_to:
-		continue
+    if len(post['title']) == 0 and len(post['content']) == 0 and len(post['imgList']) == 0:
+      skip_cnt += 1
+      continue
 
-	res = requests.post(API, data=post_data)
-	print(res.json())
+    res = requests.post(API, data=post_data)
+    print(res.json())
 
-
-f_post.close()
-f_photo.close()
+  print('skip cnt: {}'.format(skip_cnt))
+  f_post.close()
+  f_photo.close()
 
 """
 'id': 17208, 
@@ -106,5 +103,3 @@ f_photo.close()
 'updated_at': '2019-05-19T19:05:14.000+09:00', 
 'user_id': 4316, 'project_id': None, 'post_type': 1, 
 """
-
-print(skip_cnt)
