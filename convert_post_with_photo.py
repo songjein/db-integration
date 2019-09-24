@@ -2,6 +2,9 @@ import ujson
 import requests
 
 
+ROOT = 'http://ec2-54-180-96-29.ap-northeast-2.compute.amazonaws.com'
+
+
 def migrate_post_with_photo(post_filename, photo_filename):
   f_post = open(post_filename)
   f_photo = open(photo_filename)
@@ -82,7 +85,7 @@ def migrate_post_with_photo(post_filename, photo_filename):
       post_data['imgList'] = link['image_url']
       post_data['captionList'] = '출처: <a href="' + link['link_url'] + '">' + link['link_title'] + '</a>'
 
-    API = 'http://ec2-54-180-96-29.ap-northeast-2.compute.amazonaws.com:3000/post/integrate'
+    API = '{}:3000/post/integrate'.format(ROOT)
 
     if len(post['title']) == 0 and len(post['content']) == 0 and len(post['imgList']) == 0:
       skip_cnt += 1

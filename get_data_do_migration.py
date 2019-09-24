@@ -7,8 +7,10 @@ from datetime import date, timedelta
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.poolmanager import PoolManager
 
+
 today = date.today()
 today_str = today.strftime("%Y-%m-%d")
+
 
 last_date = None
 with open('last_date.txt') as f:
@@ -94,13 +96,17 @@ if __name__ == '__main__':
     from convert_binder import migrate_binder
     from convert_post_with_photo import migrate_post_with_photo
     from convert_comment import migrate_comment
+    from convert_share import migrate_share
+    from convert_like import migrate_like
 
-    today_str = '2019-09-23' # [TODO] 임시
+
+    today_str = '2019-09-24' # [TODO] 임시
+
 
     """
     [1] 유저 넣기
     """
-    # migrate_user('./data/{}_{}.txt'.format('users', today_str))
+    migrate_user('./data/{}_{}.txt'.format('users', today_str))
     
     """
     [2] 바인더 넣기
@@ -108,7 +114,7 @@ if __name__ == '__main__':
     (new db에선 user와 binder가 many to many 임)
     oldUserId가 일치하는 user객체를 가져와서 user.addBinder로 연결
     """
-    # migrate_binder('./data/{}_{}.txt'.format('binders', today_str))
+    migrate_binder('./data/{}_{}.txt'.format('binders', today_str))
 
     """
     [3] 포스트 넣기
@@ -120,7 +126,7 @@ if __name__ == '__main__':
     """
     post_filename = './data/{}_{}.txt'.format('posts', today_str)
     photo_filename = './data/{}_{}.txt'.format('photos', today_str)
-    # migrate_post_with_photo(post_filename, photo_filename)
+    migrate_post_with_photo(post_filename, photo_filename)
 
     """
     [4] comment 넣기
@@ -129,3 +135,15 @@ if __name__ == '__main__':
       oldPostId로 현재 id가져와서 생성시 활용 
     """
     migrate_comment('./data/{}_{}.txt'.format('comments', today_str))
+
+    """
+    [5] share 넣기
+    유저 아이디, 포스트 아이디만 처리하면 됨
+    """
+    migrate_share('./data/{}_{}.txt'.format('shares', today_str))
+
+    """
+    [6] like 넣기
+    유저 아이디, 포스트 아이디만 처리하면 됨
+    """
+    migrate_like('./data/{}_{}.txt'.format('likes', today_str))

@@ -10,6 +10,11 @@ import requests
 'created_at': '2016-03-21T01:53:21.000+09:00', 
 'updated_at': '2016-03-21T01:53:21.000+09:00'}
 '''
+
+
+ROOT = 'http://ec2-54-180-96-29.ap-northeast-2.compute.amazonaws.com'
+
+
 def migrate_comment(filepath):
   with open(filepath) as f:
     for line in f:
@@ -28,7 +33,7 @@ def migrate_comment(filepath):
         'createdAt': createdAt
       }
 
-      API = 'http://ec2-54-180-96-29.ap-northeast-2.compute.amazonaws.com:3000/comment/integrate'
+      API = '{}:3000/comment/integrate'.format(ROOT)
 
       res = requests.post(API, data=comment_data)
       print(res.json())

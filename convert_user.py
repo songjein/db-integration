@@ -7,6 +7,9 @@ import requests
 # 기존 서비스에서 새로운 서비스로 비밀번호 변경 요청하게끔 만들자
 
 
+ROOT = 'http://ec2-54-180-96-29.ap-northeast-2.compute.amazonaws.com'
+
+
 def migrate_user(filepath): 
   with open(filepath) as f:
     for line in f:
@@ -67,7 +70,7 @@ def migrate_user(filepath):
       }
       print(user_data)
 
-      API = 'http://ec2-54-180-96-29.ap-northeast-2.compute.amazonaws.com:3000/user/integrate'
+      API = '{}:3000/user/integrate'.format(ROOT)
       
       res = requests.post(API, data=user_data)
       print(res.json())

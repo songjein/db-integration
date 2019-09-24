@@ -3,6 +3,10 @@ import requests
 
 # camel case for node js
 
+
+ROOT = 'http://ec2-54-180-96-29.ap-northeast-2.compute.amazonaws.com'
+
+
 def migrate_binder(filepath):
   with open(filepath) as f:
     for line in f:
@@ -26,7 +30,7 @@ def migrate_binder(filepath):
         'createdAt': createdAt,
       }
 
-      API = 'http://ec2-54-180-96-29.ap-northeast-2.compute.amazonaws.com:3000/binder/integrate'
+      API = '{}:3000/binder/integrate'.format(ROOT)
 
       res = requests.post(API, data=binder_data)
       print(res.json())
